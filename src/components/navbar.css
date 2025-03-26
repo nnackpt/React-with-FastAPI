@@ -70,3 +70,22 @@
     background-color: #8E1616;
     transform: scale(1.05);
 }
+.logout-btn {
+    padding: 8px 15px;
+    background-color: #D84040;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.logout-btn:hover {
+    background-color: #8E1616;
+    transform: scale(1.05);
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+}

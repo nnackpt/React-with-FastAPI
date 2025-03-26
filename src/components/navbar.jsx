@@ -1,9 +1,36 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./navbar.css";
 
 function Navbar() {
     const location = useLocation();
+    const navigate = useNavigate();
+    const [user, setUser] = useState(null);
+
+    // Function to fetch user data from token
+    const fetchUserData = () => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const base64Url = token.split(".")[1];
+                const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+                const decodedToken = JSON.parse(window.atob(base64));
+                setUser(decodedToken);
+            } catch (err) {
+                console.error("Error decoding token:", err);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchUserData(); // Initial fetch
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        setUser(null);
+        navigate("/login");
+    };
 
     return (
         <nav className="navbar">
@@ -20,10 +47,24 @@ function Navbar() {
                 <li>
                     <Link to="/contact" className={location.pathname === "/contact" ? "active" : ""}>Contact</Link>
                 </li>
+                {user && (
+                    <li>
+                        <Link to="/profile" className={location.pathname === "/profile" ? "active" : ""}>Profile</Link>
+                    </li>
+                )}
             </ul>
             <div className="navbar-actions">
-                <Link to="/login" className="login-btn">Login</Link>
-                <Link to="/register" className="signup-btn">Sign up</Link>
+                {user ? (
+                    <div className="user-info">
+                        <span>Hello, {user.name}</span>
+                        <button className="logout-btn" onClick={handleLogout}>Logout</button>
+                    </div>
+                ) : (
+                    <>
+                        <Link to="/login" className="login-btn">Login</Link>
+                        <Link to="/register" className="signup-btn">Sign up</Link>
+                    </>
+                )}
             </div>
         </nav>
     );
