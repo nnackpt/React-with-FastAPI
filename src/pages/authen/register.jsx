@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './auth.css';
+import "../authen/auth.css"
+import SubmitButton from '../../components/common/SubmitButton';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -111,7 +112,7 @@ function Register() {
             />
           </div>
           {error && <p className="error-message">{error}</p>}
-          <button type="submit" className="btn-submit">Register</button>
+          <SubmitButton label="Register" />
         </form>
         <p>Already have an account? <a href="/login">Login here</a></p>
       </div>

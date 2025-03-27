@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "./auth.css";
+import "../authen/auth.css";
+import SubmitButton from "../../components/common/SubmitButton";
 
-function Login() {
+function ForgotPassword() {
     const [formData, setFormData] = useState({
         email: "",
-        password: "",
-    });
+        username: "",
+        newPassword: "",
+    })
 
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -19,29 +22,30 @@ function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            const response = await axios.post('http://127.0.0.1:8000/login', {
+            const response = await axios.post('http://127.0.0.1:8000/forgot-password', {
                 email: formData.email,
-                password: formData.password,
+                username: formData.username,
+                new_password: formData.newPassword,
             });
 
             console.log(response.data);
             setError('');
+            setSuccessMessage("Password updated successfully!");
 
-            localStorage.setItem('token', response.data.token);
-
-            navigate('/home');
+            setTimeout(() => {
+                navigate("/login");
+            }, 2000);
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.detail || 'An error occurred. Please try again.')
+            setError(err.response?.data?.detail || 'An error occurred. Please try again.');
         }
-    }
+    };
 
     return (
         <div className="auth-background">
             <div className="auth-container">
-                <h2>Login</h2>
+                <h2>Reset Password</h2>
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label>Email</label>
@@ -54,23 +58,33 @@ function Login() {
                             required />
                     </div>
                     <div className="form-group">
-                        <label>Password</label>
+                        <label>Username</label>
+                        <input
+                            type="text"
+                            name="username"
+                            placeholder="Enter your username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            required />
+                    </div>
+                    <div className="form-group">
+                        <label>New Password</label>
                         <input
                             type="password"
-                            name="password"
-                            placeholder="Enter your password"
-                            value={formData.password}
+                            name="newPassword"
+                            placeholder="Enter new password"
+                            value={formData.newPassword}
                             onChange={handleChange}
                             required />
                     </div>
                     {error && <p className="error-message">{error}</p>}
-                    <button type="submit" className="btn-submit">Login</button>
+                    {successMessage && <p className="succes-notification">{successMessage}</p>}
+                    <SubmitButton type="submit" label="Reset Password"/>
                 </form>
-                <p>Don't have an account? <a href="/register">Register</a></p>
-                <p>Or Continue as a <a href="/">Guest</a></p>
+                <p>Back to <a href="/login">Login</a></p>
             </div>
         </div>
     )
 }
 
-export default Login;
+export default ForgotPassword;

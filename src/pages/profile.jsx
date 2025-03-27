@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./profile.css";
-import Navbar from "../components/navbar";
+import Navbar from "../components/layout/navbar";
 
 function Profile() {
   const navigate = useNavigate();
@@ -87,8 +87,8 @@ function Profile() {
       <div className="profile-container">
         <h2>Edit Profile</h2>
         <form className="profile-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Name:</label>
+          <div className="profile-form-group">
+            <label>Name</label>
             <input
               type="text"
               name="name"
@@ -98,8 +98,8 @@ function Profile() {
               required
             />
           </div>
-          <div className="form-group">
-            <label>Email:</label>
+          <div className="profile-form-group">
+            <label>Email</label>
             <input
               type="email"
               name="email"
@@ -109,8 +109,8 @@ function Profile() {
               required
             />
           </div>
-          <div className="form-group">
-            <label>Password:</label>
+          <div className="profile-form-group">
+            <label>Password</label>
             <input
               type="password"
               name="password"
@@ -119,8 +119,8 @@ function Profile() {
               onChange={handleChange}
             />
           </div>
-          <div className="form-group">
-            <label>Confirm Password:</label>
+          <div className="profile-form-group">
+            <label>Confirm Password</label>
             <input
               type="password"
               name="confirmPassword"
@@ -129,7 +129,7 @@ function Profile() {
               onChange={handleChange}
             />
           </div>
-          {error && <p className="error-message">{error}</p>}
+          {error && <p className="profile-error-message">{error}</p>}
           {successMessage && <p className="success-message">{successMessage}</p>}
           <button type="submit" className="submit">Save Changes</button>
         </form>
