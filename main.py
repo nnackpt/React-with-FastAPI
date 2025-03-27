@@ -41,6 +41,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
+ACCES_TOKEN_EXPIRE_MINUTES = 30
 
 class User(BaseModel):
     name: str
@@ -151,3 +152,24 @@ async def update_profile(updated_data: dict, user_id: str = Depends(get_current_
         "name": updated_user["name"],
         "email": updated_user["email"],
     }
+
+@app.post("/forgot-password")
+async def forget_password(data: dict):
+    email = data.get("email")
+    username = data.get("username")
+    new_password = data.get("new_password")
+
+    if not email or not username or not new_password:
+        raise HTTPException(status_code=400, detail="Email, username, and new password are required")
+    
+    user = users_collection.find_one({"email": email, "username": username})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    hashed_password = hash_password(new_password)
+    users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"password": hashed_password}}
+    )
+
+    return {"message": "Password updated successfully"}
