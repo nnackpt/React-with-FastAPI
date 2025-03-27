@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, File, UploadFile
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from pymongo import MongoClient
@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pymongo.errors import ServerSelectionTimeoutError
 from jwt import PyJWTError, decode, encode
 import jwt
+import base64
 
 load_dotenv()
 
@@ -36,6 +37,10 @@ try:
     users_collection = db["users"]
 except ServerSelectionTimeoutError:
     raise Exception("Could not connect to MongoDB. Please check your connection.")
+
+# Directory to store uploaded profile pictures
+UPLOAD_DIR = "uploads/profile_pictures"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -123,6 +128,7 @@ async def get_profile(user_id: str = Depends(get_current_user)):
         "name": name,
         "email": email,
         "username": username,
+        "profile_picture": user.get("profile_picture", ""),
     }
 
 @app.put("/update-profile")
@@ -152,6 +158,27 @@ async def update_profile(updated_data: dict, user_id: str = Depends(get_current_
         "name": updated_user["name"],
         "email": updated_user["email"],
     }
+
+@app.post("/upload-profile-picture")
+async def upload_profile_picture(
+    data: dict,
+    user_id: str = Depends(get_current_user)
+):
+    user = users_collection.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    base64_encoded = data.get("file")
+    if not base64_encoded or not isinstance(base64_encoded, str):
+        raise HTTPException(status_code=400, detail="Invalid base64 data")
+
+    users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"profile_picture": base64_encoded}}
+    )
+
+    return {"message": "Profile picture uploaded successfully!"}
+    
 
 @app.post("/forgot-password")
 async def forget_password(data: dict):
