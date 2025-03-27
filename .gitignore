@@ -3,3 +3,4 @@ secret.py
 test_mongo.py
 .env
 __pycache__/
+uploads/
