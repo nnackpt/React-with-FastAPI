@@ -11,6 +11,8 @@ function Profile() {
     email: "",
     password: "",
     confirmPassword: "",
+    profilePicture: null,
+    currentProfilePicture: "",
   });
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -28,8 +30,15 @@ function Profile() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const { name, email } = response.data;
-        setFormData({ name, email, password: "", confirmPassword: "" });
+        const { name, email, profile_picture } = response.data;
+        setFormData({
+          name,
+          email,
+          password: "",
+          confirmPassword: "",
+          profilePicture: null,
+          currentProfilePicture: profile_picture || "",
+        });
       } catch (err) {
         console.error(err);
         setError("Failed to fetch user data");
@@ -42,6 +51,19 @@ function Profile() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setFormData({ ...formData, profilePicture: reader.result });
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -73,6 +95,16 @@ function Profile() {
         }
       );
 
+      if (formData.profilePicture && typeof formData.profilePicture === "string") {
+        await axios.post(
+          "http://127.0.0.1:8000/upload-profile-picture",
+          { file: formData.profilePicture },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+      }
+
       setError("");
       setSuccessMessage("Profile updated successfully!");
     } catch (err) {
@@ -87,6 +119,50 @@ function Profile() {
       <div className="profile-container">
         <h2>Edit Profile</h2>
         <form className="profile-form" onSubmit={handleSubmit}>
+
+          <div className="profile-picture-preview">
+            <label>Current Profile Picture</label>
+            {formData.currentProfilePicture ? (
+              <img
+                src={formData.currentProfilePicture}
+                alt="Current Profile"
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  objectFit: "cover",
+                  borderRadius: "50%",
+                  marginTop: "10px",
+                }}
+              />
+            ) : (
+                <p>No profile picture avaliable</p>
+            )}
+          </div>
+
+          <div className="profile-form-group">
+            <label>Profile Picture</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            {formData.profilePicture && (
+              <div className="profile picture preview">
+                <label>New Profile picture preview</label>
+                <img
+                  src={formData.profilePicture}
+                  alt="Profile Preview"
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    objectFit: "cover",
+                    borderRadius: "50%",
+                    marginTop: "10px",
+                  }}
+                />
+              </div>
+            )}
+          </div>
           <div className="profile-form-group">
             <label>Name</label>
             <input
